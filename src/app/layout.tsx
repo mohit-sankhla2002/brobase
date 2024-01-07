@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 
 import Navbar from "~/components/Navbar";
 import BodyWrapper from "~/components/BodyWrapper";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
           <Navbar />
         </header>
         <BodyWrapper>{children}</BodyWrapper>
+        <Toaster richColors />
       </body>
     </html>
   );

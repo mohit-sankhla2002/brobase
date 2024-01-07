@@ -11,6 +11,7 @@ interface BodyWrapperProps {
 
 const BodyWrapper: React.FC<BodyWrapperProps> = async ({ children }) => {
   const session = await getServerAuthSession();
+  console.log(session);
   return (
     <TRPCReactProvider cookies={cookies().toString()}>
       <SocketProvider>

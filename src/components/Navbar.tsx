@@ -1,11 +1,14 @@
-import React from 'react'
-import { Plane } from 'lucide-react'
+import React from "react";
+import { Plane } from "lucide-react";
+import Link from "next/link";
 const Navbar = () => {
   return (
-    <section className='w-full flex justify-center border border-b px-1 h-[8vh]'>
-        <Plane className='h-full text-gray-500' />
+    <section className="flex h-[8vh] w-full justify-center border border-b px-1">
+      <Link href="/">
+        <Plane className="h-full text-gray-500" />
+      </Link>
     </section>
-  )
-}
+  );
+};
 
 export default Navbar;
