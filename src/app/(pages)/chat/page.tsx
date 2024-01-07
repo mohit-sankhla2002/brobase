@@ -1,13 +1,11 @@
 import React from 'react'
-import FriendsArea from '~/components/chat/FriendsArea';
+import GroupArea from '../../../components/chat/GroupArea'
 
 const page = async () => {
   return (
     <section className='grid grid-cols-6 w-full h-full'>
-      {/* Group Area */}
-      <FriendsArea />
-      {/* Chat Area */}
-      <div className='col-span-6 h-full'></div>
+      <GroupArea />
+      <div className='col-span-4 h-full'></div>
     </section>
   )
 }
