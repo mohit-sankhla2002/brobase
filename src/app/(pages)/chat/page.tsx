@@ -1,5 +1,5 @@
-import React from 'react'
-import GroupArea from '../../../components/chat/GroupArea'
+import React from 'react';
+import GroupArea from '../../../components/chat/GroupArea';
 
 const page = async () => {
   return (
