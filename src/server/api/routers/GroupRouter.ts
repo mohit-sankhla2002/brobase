@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 
@@ -7,6 +8,10 @@ const createGroupValidator = z.object({
 
 const getUsersValidator = z.object({
     groupId: z.string()
+})
+
+const getMessagesValidator = z.object({
+    groupName: z.string()
 })
 
 const GroupRouter = createTRPCRouter({
@@ -44,6 +49,23 @@ const GroupRouter = createTRPCRouter({
         });
 
         return users;
+    }),
+    getMessages: protectedProcedure.input(getMessagesValidator).query(async ({ input, ctx }) => {
+        const query = await ctx.db.group.findFirst({
+            where: {
+                name: input.groupName
+            },
+            select: {
+                users: true, 
+                messages: true
+            },
+        });
+
+        if (!query?.users.find((user) => user.id === ctx.session.user.id)) {
+            return new TRPCError({code: "UNAUTHORIZED"});
+        }
+        
+        return query.messages;
     })
 });
 
