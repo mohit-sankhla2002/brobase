@@ -1,13 +1,9 @@
 import React from "react";
 
-interface Props {
-    messages: string[]
-}
-
-const ChatWindow: React.FC<Props> = ({messages}) => {
+const ChatWindow: React.FC = () => {
   return (
-    <div className="w-full h-4/5">
-        
+    <div className='col-span-4'>
+
     </div>
   )
 }

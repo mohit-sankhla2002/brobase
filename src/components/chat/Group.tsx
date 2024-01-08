@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { cn } from '~/lib/utils';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 interface GroupProps {
     groupName: string;
@@ -15,10 +16,10 @@ const Group: React.FC<GroupProps> = ({ groupName }) => {
   }
   const searchParams = useSearchParams();
   return (
-    <div onClick={groupSelector} className={cn('cursor-pointer flex gap-4 items-center p-2 border-b hover:bg-muted duration-75 transition-colors ease-in', `${searchParams.get('activeGroup') === groupName ? "bg-muted" : null}`)}>
-        <div className='w-10 h-10 bg-muted-foreground rounded-full flex items-center justify-center'>
-            <h3 className='w-fit font-light text-white'>{groupName.at(0)?.toUpperCase()}</h3>
-        </div>
+    <div onClick={groupSelector} className={cn('cursor-pointer flex gap-4 items-center p-2 border-b hover:bg-gray-200 duration-75 transition-colors ease-in', `${searchParams.get('activeGroup') === groupName ? "bg-gray-200" : null}`)}>
+        <Avatar>
+          <AvatarFallback>{groupName.slice(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
         <h2 className='text-xl tracking-tight font-semibold text-gray-800'>{groupName}</h2>
     </div>
   )
