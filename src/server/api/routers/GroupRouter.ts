@@ -41,7 +41,7 @@ const GroupRouter = createTRPCRouter({
         });
         return newGroup;
     }),
-    getUsers: protectedProcedure.input(getUsersValidator).query(async ({ input, ctx }) => {
+    getUsers: protectedProcedure.input(getUsersValidator).query(async ({ ctx }) => {
         const users = await ctx.db.group.findMany({
             select: {
                 users: true
@@ -51,6 +51,7 @@ const GroupRouter = createTRPCRouter({
         return users;
     }),
     getMessages: protectedProcedure.input(getMessagesValidator).query(async ({ input, ctx }) => {
+        // TODO: Control the number of messages fetched
         const query = await ctx.db.group.findFirst({
             where: {
                 name: input.groupName
@@ -64,9 +65,26 @@ const GroupRouter = createTRPCRouter({
         if (!query?.users.find((user) => user.id === ctx.session.user.id)) {
             return new TRPCError({code: "UNAUTHORIZED"});
         }
-        
-        return query.messages;
-    })
+
+        return query.messages.filter(async (message) => {
+            const dbQuery = await ctx.db.user.findFirst({
+                where: {
+                    id: message.senderId
+                },
+                select: {
+                    name: true
+                }
+            });
+
+            const username = dbQuery?.name;
+            return {
+                payload: message.payload, 
+                senderName: username, 
+                createdAt: message.createdAt
+            }
+        });
+    }),
+
 });
 
 export default GroupRouter;
