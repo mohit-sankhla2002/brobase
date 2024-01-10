@@ -14,9 +14,9 @@ const page = async () => {
 
   return (
     <section className='grid grid-cols-6 w-full h-[92vh]'>
-      <SecondarySidebar />
       <SocketProvider>
-        <ChatWindow />
+        <SecondarySidebar />
+        <ChatWindow user={session.user}/>
       </SocketProvider>
     </section>
   )

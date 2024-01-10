@@ -1,6 +1,7 @@
 import React from 'react';
 import { api } from '~/trpc/server';
 import Group from './Group';
+import GroupList from './GroupList';
 const GroupArea = async () => {
   const query = await api.group.getGroups.query();
   if (!query) {
@@ -9,14 +10,10 @@ const GroupArea = async () => {
     </div>
   }
   const { groups } = query;
+  const groupIds = groups.map((group) => (group.id));
   return (
     // TODO give a box shadow to the right
-    <div className='flex flex-col w-full h-full border-r'>
-      <Group groupName='Global' />
-      {groups.map((group) => {
-        return <Group key={group.id} groupName={group.name} />
-      })}
-    </div>
+    <GroupList groups={groups} />
   )
 }
 
