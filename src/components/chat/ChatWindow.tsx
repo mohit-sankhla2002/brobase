@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
@@ -10,28 +10,46 @@ import { useSearchParams } from "next/navigation";
 import { useSocket } from "~/context/SocketProvider";
 import { User } from "next-auth";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { MoreVertical } from "lucide-react"
+import { MoreVertical } from "lucide-react";
+import { Group } from "@prisma/client";
 
 interface ChatWindowProps {
-  user: User
+  user: User;
+  groups: Group[];
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ user }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
   const search = useSearchParams();
   const groupName = search.get("active");
-  const [ message, setMessage ] = useState("");
-  const { sendMessage } = useSocket();
-  
+  const [message, setMessage] = useState("");
+  const { sendMessage, sendMessageToGroup, resetMessages } = useSocket();
+
+  useEffect(() => {
+    resetMessages();
+  }, [groupName]);
+
   const messageHandler = () => {
     if (groupName === "Global") {
       sendMessage({
-        payload: message, 
+        payload: message,
         type: "default_message",
-        userId: user.id
+        userId: user.id,
+      });
+      setMessage("");
+    } else {
+      const groupId = groups.find((group) => group.name === groupName)?.id;
+      if (!groupId) {
+        return;
+      }
+      sendMessageToGroup({
+        payload: message,
+        groupId: groupId,
+        userId: user.id,
+        type: "group_message",
       });
       setMessage("");
     }
-  }
+  };
 
   return (
     <div className="relative col-span-4">
@@ -45,17 +63,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user }) => {
 
       {groupName ? (
         <div className="flex h-full flex-col gap-2">
-          <div className="flex p-2 w-full bg-gray-50 border-b border-black items-center justify-between">
-        <div className="flex gap-4 items-center">
-          <Avatar>
-            <AvatarFallback className="font-light dark text-white">{groupName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <h3 className="text-xl">{groupName}</h3>
-        </div>
-        <Button size="icon" variant="ghost" className="mr-4 rounded-full"><MoreVertical className="w-4 h-4" /></Button>
-      </div>
+          <div className="flex w-full items-center justify-between border-b border-black bg-gray-50 p-2">
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarFallback className="dark font-light text-white">
+                  {groupName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <h3 className="text-xl">{groupName}</h3>
+            </div>
+            <Button size="icon" variant="ghost" className="mr-4 rounded-full">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </div>
           {/* Area for Messages */}
-          <MessageArea userId={user.id}/>
+          <MessageArea userId={user.id} groups={groups}/>
           {/* Area to Send Message */}
           <div className="flex h-[10%] w-full items-center gap-2 border-t p-4 backdrop-brightness-75">
             <Textarea
@@ -65,7 +87,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user }) => {
               onChange={(e) => setMessage(e.target.value)}
               value={message}
             />
-            <Button variant="secondary" size="icon" className="rounded-full" onClick={messageHandler}>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="rounded-full"
+              onClick={messageHandler}
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

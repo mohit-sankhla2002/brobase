@@ -11,6 +11,8 @@ interface ISocketContext {
   sendMessage: (msg: Message) => any;
   messages: Message[];
   joinGroups: (groupIds: string[]) => any;
+  resetMessages : () => void;
+  sendMessageToGroup: (msg: Message) => any;
 }
 
 export const SocketContext = React.createContext<ISocketContext | null>(null);
@@ -35,6 +37,14 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     [socket]
   );
 
+  const sendMessageToGroup: ISocketContext['sendMessageToGroup'] = (msg) => {
+    console.log("sending message to group");
+    if (socket) {
+      console.log(`Sending Message to ${msg.groupId}`, msg);  
+      socket.emit("event:group_message", msg);
+    }
+  }
+
   const joinGroups: ISocketContext["joinGroups"] = useCallback((groupIds) => {
     console.log("joining groups", groupIds);
     if (socket) {
@@ -42,17 +52,23 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }
   }, [socket])
 
-  const onMessageRec = useCallback((msg: string) => {
+  const onMessageRec = useCallback((msg: Message) => {
     console.log("From Server Msg Rec", msg);
-    // const message = JSON.parse(msg) as Message;
-    // @ts-expect-error
     setMessages((prev) => [...prev, msg]);  
+  }, []);
+
+  const onGroupMessageRec = useCallback(((msg: Message) => {
+    setMessages((prev) => [...prev, msg]);
+  }), []);
+
+  const resetMessages = useCallback(() => {
+    setMessages([])
   }, []);
 
   useEffect(() => {
     const _socket = io("http://localhost:8000");
     _socket.on("event:default_message", onMessageRec);
-
+    _socket.on("event:group_message", onGroupMessageRec);
     setSocket(_socket);
 
     return () => {
@@ -63,7 +79,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ sendMessage, messages, joinGroups }}>
+    <SocketContext.Provider value={{ sendMessage, messages, joinGroups, resetMessages, sendMessageToGroup }}>
       {children}
     </SocketContext.Provider>
   );

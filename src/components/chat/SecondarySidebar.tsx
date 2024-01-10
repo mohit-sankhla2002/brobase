@@ -1,7 +1,13 @@
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import GroupArea from './GroupArea';
-const SecondarySidebar = () => {
+import { Group } from '@prisma/client';
+
+interface SecondarySidebarProps {
+  groups: Group[]
+}
+
+const SecondarySidebar: React.FC<SecondarySidebarProps> = ({ groups }) => {
   return (
     <Tabs defaultValue='groups' className='w-full col-span-2'>
       <TabsList className='grid grid-cols-2 w-full'>
@@ -10,7 +16,7 @@ const SecondarySidebar = () => {
       </TabsList>
 
       <TabsContent value='groups'>
-        <GroupArea />
+        <GroupArea groups={groups}/>
       </TabsContent>
       <TabsContent value='friends'>
 
