@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { api } from '~/trpc/react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { DialogClose } from "../ui/dialog"
 
 const CreateGroupForm: React.FC = () => {
     const router = useRouter();

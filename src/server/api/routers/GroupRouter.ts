@@ -29,6 +29,16 @@ const GroupRouter = createTRPCRouter({
         return groups
     }),
     createGroup: protectedProcedure.input(createGroupValidator).mutation(async ({ ctx, input } ) => {
+        const group = await ctx.db.group.findFirst({
+            where: {
+                name: input.name
+            }
+        });
+
+        if (group) {
+            return new TRPCError({ code: "CONFLICT" });
+        }
+
         const newGroup = await ctx.db.group.create({
             data: {
                 name: input.name, 

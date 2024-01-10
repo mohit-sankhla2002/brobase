@@ -1,12 +1,20 @@
 import React from 'react';
-import GroupArea from '../../../components/chat/GroupArea';
+import { getServerAuthSession } from '~/server/auth';
 import ChatWindow from '~/components/chat/ChatWindow';
 import { SocketProvider } from '~/context/SocketProvider';
+import SecondarySidebar from '~/components/chat/SecondarySidebar';
+import { permanentRedirect } from 'next/navigation';
 
 const page = async () => {
+  const session = await getServerAuthSession();
+
+  if (!session || !session.user) {
+    return permanentRedirect("/sign-in");
+  }
+
   return (
     <section className='grid grid-cols-6 w-full h-[92vh]'>
-      <GroupArea />
+      <SecondarySidebar />
       <SocketProvider>
         <ChatWindow />
       </SocketProvider>
