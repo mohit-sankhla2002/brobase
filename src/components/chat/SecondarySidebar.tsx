@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import GroupArea from './GroupArea';
+import GroupArea from './Group/GroupArea';
 import { Group } from '@prisma/client';
 
 interface SecondarySidebarProps {

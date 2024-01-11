@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { cn } from '~/lib/utils';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../../ui/avatar';
 
 interface GroupProps {
     groupName: string;

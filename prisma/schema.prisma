@@ -50,7 +50,7 @@ model User {
   accounts        Account[]
   sessions        Session[]
   messages        Message[]
-  groups          Group[]
+  groups          Group[]  
 }
 model VerificationToken {
   identifier String

@@ -5,13 +5,14 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import MessageArea from "./MessageArea";
+import MessageArea from "./Messages/MessageArea";
 import { useSearchParams } from "next/navigation";
 import { useSocket } from "~/context/SocketProvider";
 import { User } from "next-auth";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { MoreVertical } from "lucide-react";
 import { Group } from "@prisma/client";
+import GroupDetails from "./Group/GroupDetails";
 
 interface ChatWindowProps {
   user: User;
@@ -27,7 +28,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
   useEffect(() => {
     resetMessages();
   }, [groupName]);
-
+  const groupId = groups.find((group) => group.name === groupName)?.id;
   const messageHandler = () => {
     if (groupName === "Global") {
       sendMessage({
@@ -37,7 +38,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
       });
       setMessage("");
     } else {
-      const groupId = groups.find((group) => group.name === groupName)?.id;
       if (!groupId) {
         return;
       }
@@ -72,12 +72,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
               </Avatar>
               <h3 className="text-xl">{groupName}</h3>
             </div>
-            <Button size="icon" variant="ghost" className="mr-4 rounded-full">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
+            <GroupDetails groupName={groupName} groupId={groupId!} />
           </div>
           {/* Area for Messages */}
-          <MessageArea userId={user.id} groups={groups}/>
+          <MessageArea userId={user.id} groups={groups} />
           {/* Area to Send Message */}
           <div className="flex h-[10%] w-full items-center gap-2 border-t p-4 backdrop-brightness-75">
             <Textarea

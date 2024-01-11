@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import Group from './Group'
 import { useSocket } from '~/context/SocketProvider'
 
-
 interface GroupListProps {
     groups: {
         id: string, 
