@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '../ui/dialog';
 import { buttonVariants } from '../ui/button';
 import { Group } from 'lucide-react';
 import { cn } from '~/lib/utils';

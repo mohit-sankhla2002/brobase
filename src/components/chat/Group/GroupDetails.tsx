@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import {
@@ -15,14 +15,16 @@ import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import GroupMember from "./GroupMember";
 import AddGroupMember from "./AddGroupMember";
+import { User } from "@prisma/client";
 
 interface GroupDetailsProps {
   groupName: string;
   groupId: string;
+  user: User
 }
 
-const GroupDetails: React.FC<GroupDetailsProps> = ({ groupName, groupId }) => {
-  const query = api.group.getUsers.useQuery({groupId});
+const GroupDetails: React.FC<GroupDetailsProps> = ({ groupName, groupId, user }) => {
+  const query = api.group.getUsers.useQuery({ groupId });
 
   if (!query || !query.data) {
     return null;
@@ -45,14 +47,26 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({ groupName, groupId }) => {
         </h1>
         <div className="flex justify-between">
           <h3 className="text-lg tracking-tight">Members</h3>
-          <AddGroupMember groupId={groupId} groupName={groupName} groupMembers={query.data} />
+          <AddGroupMember
+            groupId={groupId}
+            groupName={groupName}
+            groupMembers={query.data}
+            user={user}
+          />
         </div>
         <Separator className="my-2" />
-        <ScrollArea className="h-full">
-            {query.data.map((member) => {
-                return <GroupMember key={member.id} image={member.image} name={member.name}/>
-            })}
+        <ScrollArea className="h-2/5">
+          {query.data.map((member) => {
+            return (
+              <GroupMember
+                key={member.id}
+                image={member.image}
+                name={member.name}
+              />
+            );
+          })}
         </ScrollArea>
+        <Button className="w-full" variant={"destructive"}>Leave Group</Button>
       </SheetContent>
     </Sheet>
   );

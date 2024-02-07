@@ -1,18 +1,28 @@
 "use client";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import type { Message } from '~/lib/types'
+
 
 interface SocketProviderProps {
   children?: React.ReactNode;
 }
 
+interface ModifiedMessage {
+  id?: string, 
+  username: string | null, 
+  payload: string, 
+  senderId: string, 
+  groupId: string,
+  createdAt?: Date
+}
+
 interface ISocketContext {
-  sendMessage: (msg: Message) => any;
-  messages: Message[];
+  sendMessage: (msg: ModifiedMessage) => any;
+  messages: ModifiedMessage[];
+  setMessages: any;
   joinGroups: (groupIds: string[]) => any;
-  resetMessages : () => void;
-  sendMessageToGroup: (msg: Message) => any;
+  resetMessages: () => void;
+  sendMessageToGroup: (msg: ModifiedMessage) => any;
 }
 
 export const SocketContext = React.createContext<ISocketContext | null>(null);
@@ -25,7 +35,7 @@ export const useSocket = () => {
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket>();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ModifiedMessage[]>([]);
 
   const sendMessage: ISocketContext["sendMessage"] = useCallback(
     (msg) => {
@@ -34,35 +44,38 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
         socket.emit("event:default_message", msg);
       }
     },
-    [socket]
+    [socket],
   );
 
-  const sendMessageToGroup: ISocketContext['sendMessageToGroup'] = (msg) => {
+  const sendMessageToGroup: ISocketContext["sendMessageToGroup"] = (msg) => {
     console.log("sending message to group");
     if (socket) {
-      console.log(`Sending Message to ${msg.groupId}`, msg);  
+      console.log(`Sending Message to ${msg.groupId}`, msg);
       socket.emit("event:group_message", msg);
     }
-  }
+  };
 
-  const joinGroups: ISocketContext["joinGroups"] = useCallback((groupIds) => {
-    console.log("joining groups", groupIds);
-    if (socket) {
-      socket.emit("event:join_group", {groupIds});
-    }
-  }, [socket])
+  const joinGroups: ISocketContext["joinGroups"] = useCallback(
+    (groupIds) => {
+      console.log("joining groups", groupIds);
+      if (socket) {
+        socket.emit("event:join_group", { groupIds });
+      }
+    },
+    [socket],
+  );
 
-  const onMessageRec = useCallback((msg: Message) => {
+  const onMessageRec = useCallback((msg: ModifiedMessage) => {
     console.log("From Server Msg Rec", msg);
-    setMessages((prev) => [...prev, msg]);  
+    setMessages((prev) => [...prev, msg]);
   }, []);
 
-  const onGroupMessageRec = useCallback(((msg: Message) => {
+  const onGroupMessageRec = useCallback((msg: ModifiedMessage) => {
     setMessages((prev) => [...prev, msg]);
-  }), []);
+  }, []);
 
   const resetMessages = useCallback(() => {
-    setMessages([])
+    setMessages([]);
   }, []);
 
   useEffect(() => {
@@ -79,7 +92,16 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ sendMessage, messages, joinGroups, resetMessages, sendMessageToGroup }}>
+    <SocketContext.Provider
+      value={{
+        sendMessage,
+        messages,
+        joinGroups,
+        resetMessages,
+        sendMessageToGroup,
+        setMessages
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

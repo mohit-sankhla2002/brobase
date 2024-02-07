@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { User } from "@prisma/client";
@@ -16,11 +16,13 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { api } from "~/trpc/react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface AddGroupMemberProps {
   groupName: string;
   groupId: string;
   groupMembers: User[] | undefined;
+  user: User
 }
 
 const AddGroupMember: React.FC<AddGroupMemberProps> = ({
@@ -33,6 +35,13 @@ const AddGroupMember: React.FC<AddGroupMemberProps> = ({
   const query = api.user.getUsersByName.useQuery({
     username,
   });
+  const router = useRouter();
+  const { mutate, isLoading } = api.group.addUserToGroup.useMutation({
+    onSuccess: (isSuccessful) => {
+      console.log("add member");
+      location.reload();
+    }
+  })
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === "") {
@@ -75,11 +84,11 @@ const AddGroupMember: React.FC<AddGroupMemberProps> = ({
           {users.length > 0 ? (
             users.map((user) => {
               return (
-                <div className="flex w-full cursor-pointer items-center gap-4 rounded-lg p-2 hover:bg-muted active:bg-gray-300">
+                <div className="flex w-full cursor-pointer items-center gap-4 rounded-lg p-2 hover:bg-muted active:bg-gray-300" onClick={() => mutate({ groupId: groupId, userId: user.id })}>
                   <Avatar>
                     <AvatarImage src={user.image || undefined} />
                     <AvatarFallback>
-                      {user.name?.slice(0, 2).toUpperCase()}
+                      {isLoading ? <Loader2 className="animate-spin duration-100" /> : user.name?.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <h4>{user.name}</h4>

@@ -21,31 +21,30 @@ const MessageRouter = createTRPCRouter({
         const messages = await ctx.db.message.findMany({
             where: {
                 groupId: input.groupId
-            }
-        });
-        return messages;
-    }),
-    sendMessage: protectedProcedure.input(sendMessageValidator).mutation(async ({ input, ctx }) => {
-        const { payload, groupName, type } = input;
-        const user = await ctx.db.user.findUnique({
-            where: {
-                id: ctx.session.user.id
             },
-            include: {
-                groups: true
+            select: {
+                sender: true,
+                payload: true,
+                senderId: true, 
+                groupId: true,
+                id: true,
+                createdAt: true
             }
         });
 
-        if (!user) {
-            return new TRPCError({ code: "UNAUTHORIZED" });
-        }
+        const modifiedMessages = messages.map((message) => {
+            return {
+                id: message.id, 
+                groupId: message.groupId, 
+                senderId: message.senderId, 
+                username: message.sender.name,
+                createdAt: message.createdAt,
+                payload: message.payload
+            }
+        })
 
-        const group = 
-
-        sendMessage({ groupId: groupId, payload: payload });
-
-
-    })
+        return modifiedMessages;
+    }),
 });
 
 export default MessageRouter;

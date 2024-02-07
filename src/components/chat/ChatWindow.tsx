@@ -8,7 +8,7 @@ import { Textarea } from "../ui/textarea";
 import MessageArea from "./Messages/MessageArea";
 import { useSearchParams } from "next/navigation";
 import { useSocket } from "~/context/SocketProvider";
-import { User } from "next-auth";
+import { User } from "@prisma/client";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { MoreVertical } from "lucide-react";
 import { Group } from "@prisma/client";
@@ -23,36 +23,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
   const search = useSearchParams();
   const groupName = search.get("active");
   const [message, setMessage] = useState("");
-  const { sendMessage, sendMessageToGroup, resetMessages } = useSocket();
+  const { sendMessageToGroup, resetMessages, setMessages } = useSocket();
 
   useEffect(() => {
     resetMessages();
   }, [groupName]);
   const groupId = groups.find((group) => group.name === groupName)?.id;
+
   const messageHandler = () => {
-    if (groupName === "Global") {
-      sendMessage({
+    setMessages((prev: any) => {
+      const messages = [...prev, {
         payload: message,
-        type: "default_message",
-        userId: user.id,
-      });
-      setMessage("");
-    } else {
-      if (!groupId) {
-        return;
-      }
-      sendMessageToGroup({
-        payload: message,
-        groupId: groupId,
-        userId: user.id,
-        type: "group_message",
-      });
-      setMessage("");
-    }
+        groupId: groupId as string,
+        senderId: user.id,
+        username: user.name,
+      }];
+
+      return messages;
+    })
+    sendMessageToGroup({
+      payload: message,
+      groupId: groupId as string,
+      senderId: user.id,
+      username: user.name,
+    });
+    setMessage("");
   };
 
   return (
-    <div className="relative col-span-4">
+    <div className="relative col-span-4 max-h-[92vh]">
       <Image
         src="/chat-background.png"
         className="absolute -z-10 opacity-70"
@@ -62,7 +61,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
       />
 
       {groupName ? (
-        <div className="flex h-full flex-col gap-2">
+        <div className="flex flex-col h-full">
           <div className="flex w-full items-center justify-between border-b border-black bg-gray-50 p-2">
             <div className="flex items-center gap-4">
               <Avatar>
@@ -72,7 +71,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ user, groups }) => {
               </Avatar>
               <h3 className="text-xl">{groupName}</h3>
             </div>
-            <GroupDetails groupName={groupName} groupId={groupId!} />
+            <GroupDetails groupName={groupName} groupId={groupId!} user={user} />
           </div>
           {/* Area for Messages */}
           <MessageArea userId={user.id} groups={groups} />

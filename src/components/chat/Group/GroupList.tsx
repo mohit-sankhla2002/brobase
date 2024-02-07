@@ -21,7 +21,6 @@ const GroupList: React.FC<GroupListProps> = ({groups}) => {
     }, [joinGroups]);
   return (
     <div className='flex flex-col w-full h-full border-r'>
-      <Group groupName='Global' />
       {groups.map((group) => {
         return <Group key={group.id} groupName={group.name} />
       })}

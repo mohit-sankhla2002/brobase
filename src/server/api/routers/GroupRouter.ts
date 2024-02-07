@@ -14,6 +14,15 @@ const getMessagesValidator = z.object({
   groupName: z.string(),
 });
 
+const AddUserToGroupValidator = z.object({
+  groupId: z.string(), 
+  userId: z.string()
+});
+
+const RemoveUserFromGroupValidator = z.object({ 
+  groupId: z.string()
+ });
+
 const GroupRouter = createTRPCRouter({
   getGroups: protectedProcedure.query(async ({ ctx }) => {
     const groups = await ctx.db.user.findFirst({
@@ -28,6 +37,60 @@ const GroupRouter = createTRPCRouter({
 
     return groups;
   }),
+
+  addUserToGroup: protectedProcedure.input(AddUserToGroupValidator).mutation(async ({ ctx, input }) => {
+    await ctx.db.group.update({
+      where: {
+        id: input.groupId
+      },
+      data: {
+        users: {
+          connect: {
+            id: input.userId
+          }
+        }
+      }
+    });
+
+    return true;
+  }),
+
+  removeUserFromGroup: protectedProcedure.input(RemoveUserFromGroupValidator).mutation(async ({ ctx, input }) => {
+    const res = await ctx.db.group.findFirst({
+      where: {
+        id: input.groupId
+      },
+      select: {
+        users: true
+      }
+    });
+
+    if (!res) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Group with given id does not exist" });
+    }
+
+    const user = res.users.find((user) => user.id === ctx.session.user.id);
+
+    if (!user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User does not belong to the group" });
+    }
+
+
+    await ctx.db.group.update({
+      where: {
+        id: input.groupId
+      },
+      data: {
+        users: {
+          disconnect: {
+            id: ctx.session.user.id
+          }
+        }
+      }
+    });
+
+  }),
+
   createGroup: protectedProcedure
     .input(createGroupValidator)
     .mutation(async ({ ctx, input }) => {

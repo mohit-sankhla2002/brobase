@@ -3,23 +3,24 @@ import { createTRPCRouter } from "../trpc";
 import { protectedProcedure } from "../trpc";
 
 const GetUsersByNameValidator = z.object({
-    username: z.string()
-})
+  username: z.string(),
+});
 
 const UserRouter = createTRPCRouter({
-    getUsersByName: protectedProcedure.input(GetUsersByNameValidator).query(async ({ ctx, input }) => {
-        const users = await ctx.db.user.findMany({
-            where: {
-                name: {
-                    startsWith: input.username
-                }, 
+  getUsersByName: protectedProcedure
+    .input(GetUsersByNameValidator)
+    .query(async ({ ctx, input }) => {
+      const users = await ctx.db.user.findMany({
+        where: {
+          name: {
+            startsWith: input.username,
+          },
+        },
+        take: 100
+      });
 
-            }
-        });
-
-
-        return users;
-    })
+      return users;
+    }),
 });
 
 export default UserRouter;
